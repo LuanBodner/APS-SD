@@ -1,0 +1,68 @@
+****Fundamentação Teórica
+
+Sobre a Ferramenta Redis
+
+Redis é um projeto de software open-source desenvolvido por Salvatore Sanfilippo, inicialmente pela VMWare e por fim sendo desenvolvida por Redis Labs. O lançamento inicial da ferramenta foi em dez de abril de 2009.
+
+A ferramenta Redis é comumente referida como um servidor de estrutura de dados. Isso significa que a feramenta da acesso à uma série de estruturas de dados mutáveis a partir de uma lista de comandos, enviadas por meio de um modelo cliente-servidor utilizando sockets TCP e um protocolo simples.
+
+O modelo cliente servidor é uma estrutura de aplicação distribuída que compartilha as tarefas e cargas de trabalho entre os fornecedores de um recurso ou serviço, desiginados como servidores e os requerentes dos serviços.
+
+Na distribuição Redis, uma máquina serve como servidor das estruturas de dados e as outras máquinas da rede podem se conectar e acessar os dados armazenados e os comandos disponíveis.
+
+->Imagem Servidor
+->Imagem Cliente
+
+Desta forma, diferentes processos podem enviar e modificar dados de forma compartilhada.
+
+As estruras suportadas pelo redis são  trings, hashes, lists, sets, sorted sets, bitmaps e hyperloglogs. Essas estruturas possuem algumas propriedades especiais, como:
+
+->Armazenamento em disco, mesmo que elas estejam modificadas e armazenadas no servidor. Desta forma, REDIS é capaz de manter sua eficiencia.
+Redis oferece opções comuns em banco de dados, como replicação, níveis de durabilidade mutáveis , etc.
+
+->A implementação de estruturas de dados geram stresse na memória, então, as estruturas de dados dentro do Redis provavelmente vai utilizar menos memória que as mesmas estruturas de dados dentro de linguagens de programação de alto nível.
+
+->Por fim, redis oferece várias 
+
+* Redis offers a number of features that are natural to find in a database, like replication, tunable levels of durability, cluster, high availability.
+
+
+NoSQ
+
+
+Pub/Sub
+
+Modelo Master-Slave
+
+As estruturas implementadas no Redis possuem algumas propriedas especiais:
+
+Armazenamento em disco, mesmo que elas estejam modificadas e armazenadas no servidor. Desta forma, REDIS é capaz de manter sua eficiencia.
+Redis oferece opções comuns em banco de dados, como replicação, níveis de durabilidade mutáveis , etc.
+
+Outra forma de se analizar o Redis é enchergá-lo como uma versão mais complexa de memchaced, onde as operações são apenas SET e GET. Redis no caso, possui dados mais complexos e mais operações possíveis também.
+
+Construindo Redis
+
+Redis é uma ferramenta multiplataforma, mas o foco é mais forte no Linux. Redis dá suporrte a big endian e little endian e também a 32 e 64bits.
+
+Para instalar a ferramenta, basta fazer o download no site e compilar, já que a ferramenta é distribuída como código fonte.
+
+Assim, deve-se rodar o servidor e o cliente para fazer os teste na máquina.
+
+Pub/Sub Redis
+
+As funções SUBSCRIBE, UNSUBSCRIBE e PUBLISH são responsáveis pela implementação do paradigma Publish/Subscrive onde os senders não estão programados para mandar mensagens para receptores, mas para canais sem saber quais serão, ou se eles existem. Os inscritos expressam o interessa em um ou mais canais e apenas recebem mensgens de interesse. Esse paradigma permite maior scalabilidade e melhor topologia
+
+Por Exemplo, para se inscrever a um canal foo e bar, o cliente manda um comando SUBSCRIBE  dando o nome para os canais:
+
+SUBSCRIBE foo bar
+
+Mensagens eviadas por outros clientes para esses canais serão enviados pelo Redis para todos os clientes inscritos.
+Um cliente inscrito por um ou mais canais não devem enviar comandos, apesar de poderem se inscrever e cancelar a inscrição em outros canais. As respostas para estes comandos são enviados em forma de mensagens, para que o cliente possa ler as mensagens de forma coerente, o primeiro elemento da mensagem indica o tipo.
+
+
+Formato das mensagens enviadas
+
+subscribe : significa que a inscrição ocorreu com sucesso dado pelo segundo elemento da mensagem. O terceiro elemento representa o numero de canais em que você está inscrito.
+unsubscribe : significa que o cancelamento da inscrição ocorreu com sucesso dado pelo segundo elemento da mensagem. O terceiro elemento representa o numero de canais em que você está inscrito.
+message : é a mensagem recebida como resultado de um comando PUBLISH enviado por outro cliente. O segundo elemento é o nome do canal enviado, e o terceiro é a mensagem.  
