@@ -26,14 +26,6 @@ Redis oferece opções comuns em banco de dados, como replicação, níveis de d
 
 * Redis offers a number of features that are natural to find in a database, like replication, tunable levels of durability, cluster, high availability.
 
-
-NoSQ
-
-
-Pub/Sub
-
-Modelo Master-Slave
-
 As estruturas implementadas no Redis possuem algumas propriedas especiais:
 
 Armazenamento em disco, mesmo que elas estejam modificadas e armazenadas no servidor. Desta forma, REDIS é capaz de manter sua eficiencia.
