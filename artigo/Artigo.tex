@@ -5,8 +5,10 @@
 \usepackage{caption}
 \usepackage{graphicx}
 \usepackage{amssymb}
-
+\usepackage{cite}
 \usepackage{listings}
+\usepackage{url}
+\renewcommand{\lstlistingname}{Configuração}% Listing -> Algorithm
 
 \title{REDIS - RSS}
 \author{Luan Bodner do Rosário \\ Felipe Veiga Ramos}
@@ -17,14 +19,14 @@
 
 \section{Resumo}
 
-Neste trabalho, propomos um serviço que simule o funcionamento de um \textit{RSS}, em que um determinado cliente possa se inscrever em um servidor e receber as atualizações por meio de um modelo \textit{publish/subscribe}. Esse trabalho é feito por meio do servidor de estruturas de dados Redis utilizando a linguagem de programação \textit{python} em conjunto com a biblioteca que faz a interface para o Redis. Verificamos que embora a interface de programação seja aparentemente simples, a quantidade de opções e possibilidades oferecidas pelo Redis é muito grande.
+Neste trabalho, propomos um serviço que simule o funcionamento de um \textit{RSS}, em que um determinado cliente possa se inscrever em um servidor e receber as atualizações por meio de um modelo \textit{publish/subscribe}. Esse trabalho é feito com base no servidor de estruturas de dados Redis utilizando a linguagem de programação \textit{python} em conjunto com a biblioteca que faz a interface para o Redis. Verificamos que embora a interface de programação seja aparentemente simples, a quantidade de opções e possibilidades oferecidas pelo Redis acabam sendo um problema.
 
 \section{Introdução}
 Este trabalho tem como objetivo mostrar características de baixo e alto nível da ferramenta Redis. Para atingir esse objetivo, e também explorar não só as vantagens mas também os problemas enfrentados pelos programadores e usuários que utilizam a ferramenta aqui descrita, propomos a criação de uma ferramenta um tanto quanto popular e bastante utilizada por diversos \textit{websites}.
 
-A ferramenta que foi "recriada" em uma versão próxima da original busca funcionar como um \textit{feed RSS}, ou seja, um programa que publica informações para um cliente inscrito para recebê-las.
+A ferramenta que foi "recriada" em uma versão simplicada da original busca funcionar como um \textit{feed RSS}, ou seja, um programa que publica informações para um cliente inscrito para recebê-las.
 
-Por meio deste trabalho, buscamos exemplificar características referentes à sistemas distribuídos, explorando temas como escalabilidade, transparência, e tratamento de falhas dentro do sistema.
+Por meio deste trabalho, buscamos exemplificar características referentes à sistemas distribuídos, explorando conceitos como escalabilidade, transparência, e tratamento de falhas por meio da programação e configuração do servidor Redis.
 
 Utilizando a linguagem de programação \textit{python}, é possível conectar APIs que fazem interface com o programa principal e fazem uso das configurações definidas pelo programador para a criação e funcionamento do servidor.
 
@@ -131,11 +133,152 @@ Nesta seção, serão descritos os detalhes de implementação na linguagem esco
 
 \subsection{Redis .conf}
 
-O arquivo redis.conf
+O servidor Redis necessita de certas configurações que habilitem o seu funcionamento da maneira esperada para que determinada tarefa seja completada. Na distribuição Redis, o arquivo redis.conf possui as configurações padrões para o funcionamento do Redis.
+
+Neste arquivo foram feitas as configurações necessárias para que o Redis funcione no contexto de uma ferramenta de RSS.
+
+\subsubsection{Bind}
+
+O \textit{bind} oferece a interface na qual o Redis escuta por conexões, o valor padrão do \textit{bind} é dado pela linha a seguir:
+
+\begin{lstlisting}[caption=Diretiva de conexão]
+#bind 127.0.0.1
+\end{lstlisting}
+
+Inicialmente não comentada, essa diretiva força o Redis a escutar apenas o endereço \textit{IPv4 lookback}, ou seja, só aceitará conexões a partir do computador no qual o servidor está rodando.
+
+O servidor Redis no caso do RSS tem o \textit{bind} comentado, significando que o Redis vai continuar escutando para qualquer cliente que queira se conectar.
+
+\subsubsection{Protected Mode}
+
+O modo de proteção é uma camada de proteção para impedir que instâncias do Redis que permaneceram abertas na internet sejam acessada e exploradas.
+
+Se nenhuma senha foi configurada e o servidor não especifica o IP pela diretiva \textit{bind}, dado que o modo de proteção esteja ligado, então o servidor só vai aceitar conexões a partir do endereço de \textit{loopback}.
+
+No servidor Redis para o RSS, o modo de proteção está desligado, para que os clientes não precisem de autenticação para se conectar.
+
+\begin{lstlisting}[caption=Diretiva de proteção]
+protected-mode no
+\end{lstlisting}
+
+\subsubsection{Replicação}
+
+A replicação se refere a forma m que os dados são copiados do mestre para o escravo. A replicação é automática e não precisa de intervenção do cliente.
+
+Quando um escravo perde conexão com o mestre, ou quando a replicação está em progresso, o escravo vai responder com uma mensagem de erro, impedindo a execução de qualquer comando.
+
+\begin{lstlisting}[caption=Diretiva de replicação]
+slave-serve-stale-data yes
+\end{lstlisting}
+
+Além disso, é possível definir se um escravo é capaz de escrever e mandar dados para o servidor, caso essa opção seja desabilitada, o cliente só pode ler informações já existentes.
+
+\begin{lstlisting}[caption=Diretiva de leitura]
+slave-read-only yes
+\end{lstlisting}
+
+\subsection{Redis Sentinel .conf}
+
+O programa sentinela também possui um arquivo de configuração, parcialmente definido pelo programador e parcialmente escrito em tempo de execução.
+
+O programa sentinela precisa de no mínimo três instâncias em execução para que o funcionamento do servidor Redis seja analisado de forma robusta.
+
+Uma das possíveis configurações na sentinela é o monitoramento do mestre. É viável determinar qual é o endereço do mestre que deve ser monitorado, e caso o servidor saia de serviço, o sentinela promove um escravo e modifica o artigo de configuração.
+
+Neste caso, verificamos o servidor presente neste mesmo computador:
+\begin{lstlisting}
+sentinel monitor mymaster 127.0.0.1 6379 2
+\end{lstlisting}
+
+Para este trabalho, esta é a principal função do sentinela: manter o serviço de RSS em funcionamento mesmo que o servidor inicial não esteja mais em funcionamento.
+
+
+\subsection{O programa}
+
+O programa que simula um RSS simplificado foi feito utilizando a linguagem \textit{python} por meio da interface \textit{python redis}, que cria um \textit{wrapper} para a utilização dos comandos presentes no Redis.
+
+No arquivo \textit{ps.py}, as classes estão divididas da seguinte maneira:
+\begin{itemize}
+\item \textit{Class Listener}: Esta é a classe que faz uso da interface com o Redis para fazer as operações de inscrição e cancelamento de inscrição. Também é utilizada para mostrar e tratar as mensagens recebidas, já que por meio de uma \textit{thread}, fica esperando mensagens chegarem no canal.
+
+\begin{lstlisting}[language=Python, caption=Classe \textit{Listener}]
+class Listener(threading.Thread):
+    def subscribe(self, canal)...
+    def unsubscribe(self)...
+    def imprime_mensagem(self, item) ...
+    def run(self)...
+\end{lstlisting}
+
+\item Outros métodos: Os outros métodos dentro do programa utilizam a classe \textit{Listener} para chamar as devidas funções do Redis e também lendo as entradas providas pelo usuário.
+Por exemplo: 
+\begin{lstlisting}[language=Python, caption=Método de Inscrição]
+def inscrever(pubsub):
+    canal = input("Nome do canal:")
+    l = Listener(pubsub,canal)
+    l.start()
+    return canal,l
+\end{lstlisting}
+
+Como citado, o método de inscrição utiliza o \textit{Listener} e uma entrada do usuário, dando início a \textit{thread} que fica escutando por novas mensagens.
+
+\item Interface básica: Para fazer interface com o usuário, utiliza-se a própria linha de comando, pedindo as entradas necessárias para o funcionamento do programa.
+
+Essas entradas estão no formato numérico, mostrando as determinadas possibilidades dentro do sistema.
+
+\begin{lstlisting}[language=Python, caption=Interface]
+//Cancelar inscricoes
+option = int(input("Digite a opcao:"))
+if option == 0:
+   finalizar(inscritos)
+\end{lstlisting}
+
+\end{itemize}
 
 \section{Resultados e Discusões}
+
+Nesta seção, apresentamos o que foi aprendido durante o desenvolvimento desta ferramenta básica que funciona de forma similar à um \textit{feed RSS}.
+
+\subsection{Resultados}
+
+Por meio dessa implementação, observamos que a ferramenta Redis é extremamente flexível e a variedade de aplicações que podem ser produzidas utilizando-a como base é extremamente grande.
+
+Além das possibilidades criadas pela interface para linguagens de programação (neste caso, para a linguagem \textit{python}), temos também os arquivos de configuração que podem alterar completamente o sistema aqui proposto.
+
+Essa característica do Redis é também um problema para um programador não experiente com a ferramenta. A quantidade de mudanças e condições que devem ser levadas em consideração para o funcionamento do Redis de a acordo com o problema a ser resolvido.
+
+Para um usuário, ou para um desenvolvedor que não conhece as possibilidades e as aplicações do Redis, a interface para linguagens de programação podem aparentar ser extremamente simples e fácil de utilizar, o que não é necessariamente verdade. A interface para a linguagem C é, em exemplos básicos, extremamente simples, mas quando a complexidade do programa a ser desenvolvido aumenta, a interface também se torna mais obscura e problemática. Esse problema foi a principal razão de utilizar a linguagem \textit{python}.
+
+O máximo que podemos afirmar por meio deste experimento é que a possibilidade de implementação de um RSS completo é possível e a parte de configuração do servidor Redis e suas sentinelas é definitivamente a que requer mais tempo e recursos para ser completada.
+
+Outro resultado dessa implementação é o aprendizado da base do funcionamento do Redis e como lidar com segurança e persistência devem ser prioridade para o programador.
+
+Infelizmente, o experimento não foi completo, ja que por restrições de tempo, não foi possível implementar e testar um sistema completo em funcionamento, o que traria ainda mais informações e aprendizado para os desenvolvedores.
+
+Apesar disso, os conceitos de RSS podem ser exemplificados por esse programa, que mesmo incompleto, é funcional para o envio e recebimento de mensagens por meio do modelo \textit{publish/subscribe}.
+
+\subsection{Discussão}
+
+Como citado anteriormente, não foi possível implementar um programa completo com o escopo projetado e discutido nos capítulos iniciais. Apenas um programa simples que exemplifica os conceitos relativamente mais básicos da teoria apresentada e discutida nas seções anteriores.
+
+Por fim, outros pontos importantes discutir, além da dificuldade de configuração do servidor, temos:
+
+\begin{itemize}
+\item Problemas de implementação: O programa desenvolvido não é completamente seguro. Devido à falta de tempo, não foi possível fazer toda o tratamento de exceção necessário para garantir o funcionamento perfeito RSS simplificado.
+\item Persistência: Não foi possível configurar o servidor de forma que as mensagens enviadas para os canais de comunicação persistam para os clientes.
+\item Criação de canais: A criação de canais e gerenciamento tiveram que ser modificados da idéia original. Nesta versão, os canais são criados em tempo de execução, sendo possível gerenciar os canais em que um usuário está escrito, e como citado acima, não existe persistência do canal.
+\item Facilidade de Programação: A interface do Redis para a linguagem \textit{python} é bastante simples. Apesar de extremamente simplificado, a interface e a linguagem facilitaram a implementação.
+\end{itemize}
+
 \section{Conclusões}
-\section{Referência}
+
+A partir deste trabalho, podemos concluir que a ferramenta Redis é versátil e dá suporte para diversos tipos de aplicação que podem ser implementadas utilizando as principais linguagens do mercado.
+
+Apesar da flexibilidade, a configuração do servidor é um tanto quanto complexa devido a abertura do sistema para o programador. Portanto, o foco durante o desenvolvimento de um serviço baseado no Redis deve ser em cima primeiramente da configuração do Redis e de suas sentinelas.
+
+\nocite{*}
+\bibliographystyle{ieeetr}  
+
+\bibliography{Ref}
 
 
 \end{document}

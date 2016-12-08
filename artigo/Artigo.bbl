@@ -1,0 +1,36 @@
+\begin{thebibliography}{1}
+
+\bibitem{RediDoc}
+``Redis documentation.'' \url{https://redis.io/documentation}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{RedisSentinel}
+``Redis sentinel documentation.'' \url{https://redis.io/topics/sentinel}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{RediPubSub}
+``Redis publish/subscribe.'' \url{https://redis.io/topics/pubsub}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{RediData}
+``Redis data types.'' \url{https://redis.io/topics/data-types-intro}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{RediCom}
+``Redis commands.'' \url{https://redis.io/commands}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{Rss}
+``Rss.'' \url{https://pt.wikipedia.org/wiki/RSS}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{InfoRss}
+``Rss.'' \url{http://www.infowester.com/rss.php}.
+\newblock Acessado: 08-12-2016.
+
+\bibitem{PubSub}
+``Pub/sub pattern.''
+  \url{https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern}.
+\newblock Acessado: 08-12-2016.
+
+\end{thebibliography}
