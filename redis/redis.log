@@ -4,7 +4,7 @@
   .-`` .-```.  ```\/    _.,_ ''-._                                   
  (    '      ,       .-`  | `,    )     Running in standalone mode
  |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
- |    `-._   `._    /     _.-'    |     PID: 4984
+ |    `-._   `._    /     _.-'    |     PID: 11172
   `-._    `-._  `-./  _.-'    _.-'                                   
  |`-._`-._    `-.__.-'    _.-'_.-'|                                  
  |    `-._`-._        _.-'_.-'    |           http://redis.io        
@@ -16,5 +16,39 @@
           `-._        _.-'                                           
               `-.__.-'                                               
 
-[4984] 30 Nov 10:37:33.197 # Server started, Redis version 3.2.100
-[4984] 30 Nov 10:37:33.197 * The server is now ready to accept connections on port 6379
+[11172] 01 Dec 16:24:28.385 # Server started, Redis version 3.2.100
+[11172] 01 Dec 16:24:28.385 * The server is now ready to accept connections on port 6379
+[11172] 01 Dec 16:25:38.082 # User requested shutdown...
+[11172] 01 Dec 16:25:38.082 * Saving the final RDB snapshot before exiting.
+[11172] 01 Dec 16:25:38.100 * DB saved on disk
+[11172] 01 Dec 16:25:38.100 # Redis is now ready to exit, bye bye...
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 3.2.100 (00000000/0) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 536
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+[536] 01 Dec 16:27:13.397 # Server started, Redis version 3.2.100
+[536] 01 Dec 16:27:13.397 * DB loaded from disk: 0.000 seconds
+[536] 01 Dec 16:27:13.397 * The server is now ready to accept connections on port 6379
+[536] 01 Dec 16:31:07.988 * DB saved on disk
+[536] 01 Dec 16:46:08.069 * 1 changes in 900 seconds. Saving...
+[536] 01 Dec 16:46:08.137 * Background saving started by pid 2840
+[536] 01 Dec 16:46:08.338 # fork operation complete
+[536] 01 Dec 16:46:08.338 * Background saving terminated with success
+[536] 02 Dec 16:53:36.118 # User requested shutdown...
+[536] 02 Dec 16:53:36.118 * Saving the final RDB snapshot before exiting.
+[536] 02 Dec 16:53:36.148 * DB saved on disk
+[536] 02 Dec 16:53:36.149 # Redis is now ready to exit, bye bye...
